@@ -1,52 +1,35 @@
 name: Dev Container Build and Push Image
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - "main"
-    tags:
-      - "v*.*.*"
-  pull_request:
-    branches:
-      - "main"
-
+workflow_dispatch:
+push:
+branches:
+- "main"
+tags:
+- "v*.."
+pull_requests:
+branches:
+- "main"
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'  # Specify your Python version here
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt  # Adjust as per your project setup
-
-      - name: Run Streamlit App
-        run: |
-          streamlit run pages/main.py  # Adjust this line to match your script location
-
-      - name: Push Docker Image to GitHub Container Registry
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: Dockerfile
-          push: true
-          tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
-
-      - name: Clean up Docker Images
-        run: docker image prune -f
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.REGISTRY_TOKEN }}
+build-and-push:
+runs-on: ubuntu-latest
+steps:
+-
+name: Checkout
+id: checkout
+uses: actions/checkout@v1
+-
+name: Login to GitHub Container Registry
+uses: docker/login-action@v2
+with:
+registry: ghcr.io
+username: ${{ github.actor }}
+password: ${{ secrets.REGISTRY_TOKEN }}
+-
+name: Pre-build dev container image
+uses: devcontainers/ci@v0.2
+with:
+subFolder: .github
+imageName: ghcr.io/${{ github.repository }}
+cacheFrom: ghcr.io/${{ github.repository }}
+push: always
