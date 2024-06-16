@@ -10,7 +10,7 @@ def run():
 custom_css = """
 <style>
 body {
-    background-color: #f0f0f0; /* Set your desired background color here */
+    background-color: #F1BABF; /* Set your desired background color here */
 }
 </style>
 """
